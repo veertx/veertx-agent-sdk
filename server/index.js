@@ -10,6 +10,14 @@ const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
 
 const app = express();
 
+const cors = require('cors');
+app.set('trust proxy', 1);
+app.use(cors({
+  origin: 'https://agents.veertx.com',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key'],
+}));
+
 app.use(express.json());
 
 // Log all requests

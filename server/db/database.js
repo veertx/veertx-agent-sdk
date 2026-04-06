@@ -7,6 +7,7 @@ const db = new Database(dbPath);
 
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
+db.pragma('synchronous = NORMAL');
 
 const schema = fs.readFileSync(
   path.join(__dirname, '../../db/schema.sql'),

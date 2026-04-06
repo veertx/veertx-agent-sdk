@@ -1,0 +1,5 @@
+.env
+agents.sqlite
+node_modules
+dist
+*.log

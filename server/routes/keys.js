@@ -1,7 +1,6 @@
 const { Router } = require('express');
 const { z } = require('zod');
 const crypto = require('crypto');
-const argon2 = require('argon2');
 const auth = require('../middleware/auth');
 const db = require('../db/database');
 
@@ -44,8 +43,8 @@ router.post('/', async (req, res, next) => {
     const apiKey = `vrtx_live_${random}`;
     const prefix = `vrtx_live_${random.slice(0, 8)}`;
 
-    // Hash with argon2
-    const keyHash = await argon2.hash(apiKey);
+    // Hash with HMAC-SHA256
+    const keyHash = crypto.createHmac('sha256', process.env.API_KEY_SECRET).update(apiKey).digest('hex');
 
     db.prepare(
       'INSERT INTO api_keys (developer_id, key_hash, prefix) VALUES (?, ?, ?)'

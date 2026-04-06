@@ -1,4 +1,4 @@
-const argon2 = require('argon2');
+const crypto = require('crypto');
 const db = require('../db/database');
 
 async function auth(req, res, next) {
@@ -48,12 +48,11 @@ async function auth(req, res, next) {
     });
   }
 
-  let valid;
-  try {
-    valid = await argon2.verify(row.key_hash, apiKey);
-  } catch (_) {
-    valid = false;
-  }
+  const inputHash = crypto.createHmac('sha256', process.env.API_KEY_SECRET).update(apiKey).digest('hex');
+  const storedHashBuffer = Buffer.from(row.key_hash, 'hex');
+  const inputHashBuffer = Buffer.from(inputHash, 'hex');
+  const valid = storedHashBuffer.length === inputHashBuffer.length &&
+    crypto.timingSafeEqual(storedHashBuffer, inputHashBuffer);
 
   if (!valid) {
     return res.status(401).json({

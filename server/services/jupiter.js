@@ -15,7 +15,7 @@ async function getQuote(inputMint, outputMint, amount, slippageBps) {
     outputMint,
     amount: String(amount),
     slippageBps: String(slippageBps),
-    feeBps: '50',
+    platformFeeBps: '50',
   });
 
   const res = await fetch(`${JUPITER_API}/quote?${params}`, {

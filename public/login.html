@@ -3,59 +3,91 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login – VeerTx Agents</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <title>Sign in – VeerTx Agents</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0a0a; color: #ffffff; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-    .card { background: #111111; border: 1px solid #222222; border-radius: 2px; padding: 48px; width: 100%; max-width: 420px; }
-    .logo { color: #00ff88; font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 32px; }
-    h1 { font-size: 22px; text-align: center; margin-bottom: 8px; }
-    .subtitle { color: #888888; font-size: 13px; text-align: center; margin-bottom: 32px; }
-    label { display: block; font-size: 13px; color: #888888; margin-bottom: 8px; }
-    input[type="email"] { width: 100%; background: #0a0a0a; border: 1px solid #222222; color: #ffffff; padding: 12px; border-radius: 2px; font-family: inherit; font-size: 14px; outline: none; margin-bottom: 20px; }
-    input[type="email"]:focus { border-color: #00ff88; }
+    body { background: #000000; color: #ffffff; font-family: 'Inter', -apple-system, sans-serif; -webkit-font-smoothing: antialiased; min-height: 100vh; display: flex; flex-direction: column; }
+    a { color: inherit; text-decoration: none; }
+
+    nav { position: sticky; top: 0; z-index: 50; display: flex; justify-content: space-between; align-items: center; padding: 0 32px; height: 64px; border-bottom: 1px solid #1a1a1a; background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    nav .logo { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; }
+    nav .nav-right { display: flex; align-items: center; gap: 24px; }
+    nav .nav-link { color: #666666; font-size: 14px; font-weight: 500; transition: color 0.15s; }
+    nav .nav-link:hover { color: #ffffff; }
+    nav .nav-cta { background: #00ff88; color: #000000; font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 4px; border: none; font-family: inherit; cursor: pointer; transition: opacity 0.15s; }
+    nav .nav-cta:hover { opacity: 0.85; }
+
+    main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+    .card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 4px; padding: 48px; width: 100%; max-width: 400px; }
+    .card-logo { color: #00ff88; font-size: 14px; font-weight: 600; margin-bottom: 24px; }
+    .card h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .card .subtitle { color: #666666; font-size: 14px; margin-bottom: 32px; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 13px; font-weight: 500; color: #888888; margin-bottom: 8px; }
+    .field input { width: 100%; background: #000000; border: 1px solid #1a1a1a; color: #ffffff; padding: 10px 14px; border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 14px; outline: none; transition: border-color 0.15s; }
+    .field input:focus { border-color: #00ff88; }
+    .field input::placeholder { color: #444444; }
     .turnstile-wrap { margin-bottom: 20px; }
-    .submit-btn { width: 100%; background: #00ff88; color: #0a0a0a; border: none; padding: 14px; border-radius: 2px; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
-    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .msg { margin-top: 16px; font-size: 13px; text-align: center; }
-    .msg.error { color: #ff4444; }
-    .msg.success { color: #00ff88; }
+    .submit-btn { width: 100%; background: #00ff88; color: #000000; font-weight: 600; padding: 10px; border-radius: 4px; border: none; font-family: 'Inter', sans-serif; font-size: 14px; cursor: pointer; transition: opacity 0.15s; }
+    .submit-btn:hover { opacity: 0.85; }
+    .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .error-msg { color: #ef4444; font-size: 13px; margin-top: 12px; }
+    .success { text-align: center; padding: 20px 0; }
+    .success .check { width: 48px; height: 48px; margin: 0 auto 16px; border-radius: 50%; border: 2px solid #00ff88; display: flex; align-items: center; justify-content: center; }
+    .success .check svg { width: 24px; height: 24px; stroke: #00ff88; fill: none; stroke-width: 2; }
+    .success p { color: #ffffff; font-size: 15px; font-weight: 500; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="logo">VeerTx Agents</div>
-    <h1>Developer Login</h1>
-    <p class="subtitle">Enter your email to receive a magic login link</p>
-    <form id="loginForm">
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" placeholder="you@example.com" required>
-      <div class="turnstile-wrap">
-        <div class="cf-turnstile" data-sitekey="TURNSTILE_SITE_KEY_PLACEHOLDER"></div>
+  <nav>
+    <a href="/" class="logo">VeerTx Agents</a>
+    <div class="nav-right">
+      <a href="https://github.com/veertx/veertx-agent-sdk" target="_blank" class="nav-link">GitHub</a>
+      <a href="/login"><button class="nav-cta">Get API Key</button></a>
+    </div>
+  </nav>
+
+  <main>
+    <div class="card">
+      <div class="card-logo">VeerTx Agents</div>
+      <div id="formView">
+        <h1>Sign in</h1>
+        <p class="subtitle">Enter your email to receive a magic link</p>
+        <form id="loginForm">
+          <div class="field">
+            <label for="email">Email address</label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+          </div>
+          <div class="turnstile-wrap">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAACwDAtG1Pj7vnQyq"></div>
+          </div>
+          <button type="submit" class="submit-btn" id="submitBtn">Continue with email</button>
+          <div id="error" class="error-msg"></div>
+        </form>
       </div>
-      <button type="submit" class="submit-btn" id="submitBtn">Send Login Link</button>
-    </form>
-    <div id="msg" class="msg"></div>
-  </div>
+      <div id="successView" class="success" style="display:none">
+        <div class="check"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <p>Check your email. Magic link sent.</p>
+      </div>
+    </div>
+  </main>
 
   <script>
     const form = document.getElementById('loginForm');
     const btn = document.getElementById('submitBtn');
-    const msg = document.getElementById('msg');
+    const error = document.getElementById('error');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      msg.textContent = '';
-      msg.className = 'msg';
+      error.textContent = '';
 
       const email = document.getElementById('email').value.trim();
       const turnstileToken = typeof turnstile !== 'undefined' ? turnstile.getResponse() : '';
 
       if (!turnstileToken) {
-        msg.textContent = 'Please complete the verification.';
-        msg.classList.add('error');
+        error.textContent = 'Please complete the verification.';
         return;
       }
 
@@ -71,19 +103,17 @@
         const data = await res.json();
 
         if (res.ok) {
-          msg.textContent = 'Check your email! Login link sent.';
-          msg.classList.add('success');
-          form.style.display = 'none';
+          document.getElementById('formView').style.display = 'none';
+          document.getElementById('successView').style.display = '';
         } else {
-          msg.textContent = data.error?.message || 'Something went wrong.';
-          msg.classList.add('error');
+          error.textContent = data.error?.message || 'Something went wrong.';
+          btn.disabled = false;
+          btn.textContent = 'Continue with email';
         }
       } catch {
-        msg.textContent = 'Network error. Please try again.';
-        msg.classList.add('error');
-      } finally {
+        error.textContent = 'Network error. Please try again.';
         btn.disabled = false;
-        btn.textContent = 'Send Login Link';
+        btn.textContent = 'Continue with email';
       }
     });
   </script>

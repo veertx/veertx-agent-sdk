@@ -1,4 +1,4 @@
-const JUPITER_API = 'https://lite.jup.ag/v6';
+const JUPITER_API = 'https://api.jup.ag/v6';
 
 const MINT_ADDRESSES = {
   SOL: 'So11111111111111111111111111111111111111112',
@@ -18,7 +18,9 @@ async function getQuote(inputMint, outputMint, amount, slippageBps) {
     feeBps: '50',
   });
 
-  const res = await fetch(`${JUPITER_API}/quote?${params}`);
+  const res = await fetch(`${JUPITER_API}/quote?${params}`, {
+    headers: { 'Authorization': `Bearer ${process.env.JUPITER_API_KEY}` },
+  });
 
   if (!res.ok) {
     const body = await res.text();
@@ -31,7 +33,10 @@ async function getQuote(inputMint, outputMint, amount, slippageBps) {
 async function buildSwapTransaction(quoteResponse, userPublicKey) {
   const res = await fetch(`${JUPITER_API}/swap`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.JUPITER_API_KEY}`,
+    },
     body: JSON.stringify({
       quoteResponse,
       userPublicKey,

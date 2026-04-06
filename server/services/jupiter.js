@@ -1,4 +1,4 @@
-const JUPITER_API = 'https://api.jup.ag/v6';
+const JUPITER_API = 'https://api.jup.ag/swap/v1';
 
 const MINT_ADDRESSES = {
   SOL: 'So11111111111111111111111111111111111111112',

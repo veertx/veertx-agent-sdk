@@ -25,3 +25,20 @@ CREATE TABLE IF NOT EXISTS transactions (
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (api_key_id) REFERENCES api_keys(id)
 );
+
+CREATE TABLE IF NOT EXISTS magic_tokens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    developer_id INTEGER NOT NULL REFERENCES developers(id),
+    token_hash TEXT NOT NULL UNIQUE,
+    expires_at INTEGER NOT NULL,
+    used INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL DEFAULT (unixepoch())
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    developer_id INTEGER NOT NULL REFERENCES developers(id),
+    session_hash TEXT NOT NULL UNIQUE,
+    expires_at INTEGER NOT NULL,
+    created_at INTEGER NOT NULL DEFAULT (unixepoch())
+);

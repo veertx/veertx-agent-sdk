@@ -20,6 +20,9 @@ app.use(cors({
 
 app.use(express.json());
 
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
 // Log all requests
 app.use((req, res, next) => {
   const start = Date.now();
@@ -45,6 +48,8 @@ app.get('/health', (_req, res) => {
 // Routes
 app.use('/v1/swap', swapRouter);
 app.use('/v1/keys', keysRouter);
+const portalRouter = require('./routes/portal');
+app.use('/v1/portal', portalRouter);
 
 // Error handler
 app.use((err, _req, res, _next) => {

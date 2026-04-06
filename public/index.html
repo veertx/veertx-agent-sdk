@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VeerTx Agents</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0a; color: #ffffff; font-family: 'JetBrains Mono', monospace; }
+    a { color: #00ff88; text-decoration: none; }
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; position: relative; z-index: 10; }
+    nav .logo { color: #00ff88; font-size: 20px; font-weight: 700; }
+    nav .login-btn { background: #00ff88; color: #0a0a0a; border: none; padding: 10px 24px; border-radius: 2px; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .hero { position: relative; text-align: center; padding: 120px 20px 80px; }
+    .hero canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+    .hero-content { position: relative; z-index: 1; }
+    .hero h1 { font-size: 48px; font-weight: 700; margin-bottom: 20px; max-width: 800px; margin-left: auto; margin-right: auto; }
+    .hero p { color: #888888; font-size: 16px; max-width: 600px; margin: 0 auto 40px; }
+    .hero-buttons { display: flex; gap: 16px; justify-content: center; }
+    .hero-buttons a { padding: 14px 32px; border-radius: 2px; font-family: inherit; font-size: 14px; font-weight: 500; }
+    .btn-primary { background: #00ff88; color: #0a0a0a; }
+    .btn-secondary { background: transparent; color: #00ff88; border: 1px solid #222222; }
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 60px 40px; max-width: 1100px; margin: 0 auto; }
+    .feature-card { background: #111111; border: 1px solid #222222; border-radius: 2px; padding: 32px; }
+    .feature-card h3 { color: #00ff88; font-size: 18px; margin-bottom: 12px; }
+    .feature-card p { color: #888888; font-size: 14px; line-height: 1.6; }
+    .code-section { max-width: 1100px; margin: 0 auto; padding: 60px 40px; }
+    .code-section h2 { font-size: 28px; margin-bottom: 24px; }
+    .code-block { background: #111111; border: 1px solid #222222; border-radius: 2px; padding: 24px; overflow-x: auto; font-size: 13px; line-height: 1.7; color: #888888; }
+    .code-block .cmd { color: #00ff88; }
+    .code-block .str { color: #9945FF; }
+    footer { border-top: 1px solid #222222; padding: 40px; text-align: center; color: #888888; font-size: 13px; margin-top: 60px; }
+    footer a { color: #888888; margin: 0 12px; }
+    footer a:hover { color: #00ff88; }
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 28px; }
+      .features { grid-template-columns: 1fr; }
+      nav { padding: 16px 20px; }
+      .code-section, .features { padding: 40px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">VeerTx Agents</div>
+    <a href="/login"><button class="login-btn">Login</button></a>
+  </nav>
+
+  <section class="hero">
+    <canvas id="matrix"></canvas>
+    <div class="hero-content">
+      <h1>Privacy-First API for AI Agent Payments on Solana</h1>
+      <p>Non-custodial swap infrastructure. Your agents sign locally. We never touch your keys.</p>
+      <div class="hero-buttons">
+        <a href="/login" class="btn-primary">Get API Key</a>
+        <a href="https://veertx.gitbook.io/veertx-docs" target="_blank" class="btn-secondary">View Docs</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="feature-card">
+      <h3>Non-Custodial</h3>
+      <p>Your private keys never leave your device. Transactions are signed locally by your agent and submitted directly to Solana.</p>
+    </div>
+    <div class="feature-card">
+      <h3>Jupiter Powered</h3>
+      <p>Best-in-class swap routing through Jupiter aggregator. Optimal prices across all Solana DEXs with configurable slippage.</p>
+    </div>
+    <div class="feature-card">
+      <h3>Privacy Native</h3>
+      <p>No wallet tracking, no analytics on your trades. We return the transaction, you sign and send. Zero data retention on swap details.</p>
+    </div>
+  </section>
+
+  <section class="code-section">
+    <h2>Quick Start</h2>
+    <div class="code-block">
+      <span class="cmd">curl</span> -X POST https://agents.veertx.com/v1/swap \<br>
+      &nbsp;&nbsp;-H <span class="str">"Authorization: Bearer vrtx_live_..."</span> \<br>
+      &nbsp;&nbsp;-H <span class="str">"Content-Type: application/json"</span> \<br>
+      &nbsp;&nbsp;-d <span class="str">'{<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;"inputToken": "SOL",<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;"outputToken": "USDC",<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;"amount": "100000000",<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;"agentPublicKey": "YourSolanaPublicKey...",<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;"slippageBps": 50<br>
+      &nbsp;&nbsp;}'</span>
+    </div>
+  </section>
+
+  <footer>
+    <div>VeerTx Agents</div>
+    <div style="margin-top: 12px;">
+      <a href="https://veertx.com">veertx.com</a>
+      <a href="https://x.com/VeerTx" target="_blank">@VeerTx</a>
+    </div>
+  </footer>
+
+  <script>
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    function resize() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+    const cols = Math.floor(canvas.width / 16);
+    const drops = Array(cols).fill(1);
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%';
+    function draw() {
+      ctx.fillStyle = 'rgba(10, 10, 10, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#00ff88';
+      ctx.font = '14px JetBrains Mono';
+      for (let i = 0; i < drops.length; i++) {
+        const ch = chars[Math.floor(Math.random() * chars.length)];
+        ctx.globalAlpha = 0.3;
+        ctx.fillText(ch, i * 16, drops[i] * 16);
+        if (drops[i] * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+      ctx.globalAlpha = 1;
+    }
+    setInterval(draw, 40);
+  </script>
+</body>
+</html>

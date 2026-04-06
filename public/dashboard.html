@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – VeerTx Agents</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0a; color: #ffffff; font-family: 'JetBrains Mono', monospace; }
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid #222222; }
+    nav .logo { color: #00ff88; font-size: 20px; font-weight: 700; }
+    nav .right { display: flex; align-items: center; gap: 16px; }
+    nav .email { color: #888888; font-size: 13px; }
+    .logout-btn { background: transparent; color: #888888; border: 1px solid #222222; padding: 8px 16px; border-radius: 2px; font-family: inherit; font-size: 13px; cursor: pointer; }
+    .logout-btn:hover { color: #ffffff; border-color: #888888; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 40px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
+    .stat-card { background: #111111; border: 1px solid #222222; border-radius: 2px; padding: 24px; }
+    .stat-card .label { color: #888888; font-size: 12px; margin-bottom: 8px; }
+    .stat-card .value { font-size: 28px; font-weight: 700; }
+    .stat-card .status-dot { display: inline-block; width: 8px; height: 8px; background: #00ff88; border-radius: 50%; margin-right: 8px; }
+    .chart-section { background: #111111; border: 1px solid #222222; border-radius: 2px; padding: 24px; margin-bottom: 40px; }
+    .chart-section h2 { font-size: 16px; margin-bottom: 20px; }
+    .keys-section h2 { font-size: 16px; margin-bottom: 20px; }
+    .generate-btn { background: #00ff88; color: #0a0a0a; border: none; padding: 10px 24px; border-radius: 2px; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; color: #888888; font-size: 12px; font-weight: 500; padding: 12px 16px; border-bottom: 1px solid #222222; }
+    td { padding: 12px 16px; border-bottom: 1px solid #222222; font-size: 13px; }
+    .status-active { color: #00ff88; }
+    .status-revoked { color: #ff4444; }
+    .revoke-btn { background: transparent; color: #ff4444; border: 1px solid #ff4444; padding: 6px 12px; border-radius: 2px; font-family: inherit; font-size: 12px; cursor: pointer; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: #111111; border: 1px solid #222222; border-radius: 2px; padding: 40px; max-width: 520px; width: 100%; }
+    .modal h3 { color: #ff4444; font-size: 14px; margin-bottom: 16px; }
+    .modal .key-display { background: #0a0a0a; border: 1px solid #222222; padding: 16px; border-radius: 2px; font-size: 13px; word-break: break-all; margin-bottom: 16px; }
+    .modal .btn-row { display: flex; gap: 12px; }
+    .modal .copy-btn { background: #00ff88; color: #0a0a0a; border: none; padding: 10px 24px; border-radius: 2px; font-family: inherit; font-size: 13px; cursor: pointer; }
+    .modal .close-btn { background: transparent; color: #888888; border: 1px solid #222222; padding: 10px 24px; border-radius: 2px; font-family: inherit; font-size: 13px; cursor: pointer; }
+    @media (max-width: 768px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      nav { padding: 16px 20px; }
+      .container { padding: 20px; }
+    }
+  </style>
+</head>
+<body style="display:none">
+  <nav>
+    <div class="logo">VeerTx Agents</div>
+    <div class="right">
+      <span class="email" id="devEmail"></span>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="stats">
+      <div class="stat-card">
+        <div class="label">Total Swaps</div>
+        <div class="value" id="totalSwaps">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Active Keys</div>
+        <div class="value" id="activeKeys">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Referral Fees Earned</div>
+        <div class="value">$0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Status</div>
+        <div class="value"><span class="status-dot"></span>Operational</div>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <h2>Swaps Last 7 Days (UTC)</h2>
+      <canvas id="swapChart" height="200"></canvas>
+    </div>
+
+    <div class="keys-section">
+      <h2>API Keys</h2>
+      <button class="generate-btn" id="generateBtn">Generate New Key</button>
+      <table>
+        <thead>
+          <tr><th>Prefix</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="keysBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <h3>Save this key now. You will NEVER see it again.</h3>
+      <div class="key-display" id="keyDisplay"></div>
+      <div class="btn-row">
+        <button class="copy-btn" id="copyBtn">Copy</button>
+        <button class="close-btn" id="closeModal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let swapChart = null;
+
+    async function init() {
+      try {
+        const res = await fetch('/v1/portal/keys', { credentials: 'same-origin' });
+        if (res.status === 401) { window.location.href = '/login'; return; }
+        const data = await res.json();
+        document.body.style.display = '';
+        renderKeys(data.data.keys);
+        loadStats();
+      } catch {
+        window.location.href = '/login';
+      }
+    }
+
+    function renderKeys(keys) {
+      const active = keys.filter(k => k.status === 'active');
+      document.getElementById('activeKeys').textContent = active.length;
+      const tbody = document.getElementById('keysBody');
+      tbody.innerHTML = keys.map(k => `
+        <tr>
+          <td>${esc(k.prefix)}</td>
+          <td class="status-${k.status}">${k.status}</td>
+          <td>${k.created_at}</td>
+          <td>${k.status === 'active' ? `<button class="revoke-btn" onclick="revokeKey(${k.id})">Revoke</button>` : '—'}</td>
+        </tr>
+      `).join('');
+    }
+
+    function esc(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/v1/portal/stats', { credentials: 'same-origin' });
+        if (!res.ok) return;
+        const data = await res.json();
+        const stats = data.data.stats;
+        const total = stats.reduce((s, d) => s + d.count, 0);
+        document.getElementById('totalSwaps').textContent = total;
+
+        const ctx = document.getElementById('swapChart').getContext('2d');
+        if (swapChart) swapChart.destroy();
+        swapChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: stats.map(d => d.date),
+            datasets: [{
+              data: stats.map(d => d.count),
+              backgroundColor: '#00ff88',
+              borderRadius: 2,
+            }],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { color: '#888888', font: { family: 'JetBrains Mono', size: 11 } }, grid: { color: '#222222' } },
+              y: { beginAtZero: true, ticks: { color: '#888888', font: { family: 'JetBrains Mono', size: 11 }, stepSize: 1 }, grid: { color: '#222222' } },
+            },
+          },
+        });
+      } catch {}
+    }
+
+    async function revokeKey(id) {
+      if (!confirm('Revoke this API key?')) return;
+      await fetch(`/v1/portal/keys/${id}`, { method: 'DELETE', credentials: 'same-origin' });
+      init();
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', async () => {
+      try {
+        const res = await fetch('/v1/portal/keys', { method: 'POST', credentials: 'same-origin' });
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('keyDisplay').textContent = data.data.apiKey;
+          document.getElementById('modal').classList.add('active');
+          init();
+        }
+      } catch {}
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      navigator.clipboard.writeText(document.getElementById('keyDisplay').textContent);
+      document.getElementById('copyBtn').textContent = 'Copied!';
+      setTimeout(() => { document.getElementById('copyBtn').textContent = 'Copy'; }, 2000);
+    });
+
+    document.getElementById('closeModal').addEventListener('click', () => {
+      document.getElementById('keyDisplay').innerText = '';
+      document.getElementById('modal').classList.remove('active');
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/v1/portal/auth/logout', { method: 'POST', credentials: 'same-origin' });
+      window.location.href = '/login';
+    });
+
+    init();
+  </script>
+</body>
+</html>

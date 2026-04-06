@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const express = require('express');
+const path = require('path');
 const pino = require('pino');
 const { globalLimiter } = require('./middleware/rateLimiter');
 const swapRouter = require('./routes/swap');
@@ -50,6 +51,12 @@ app.use('/v1/swap', swapRouter);
 app.use('/v1/keys', keysRouter);
 const portalRouter = require('./routes/portal');
 app.use('/v1/portal', portalRouter);
+
+// Static files and clean URLs
+app.use(express.static(path.join(__dirname, '../public'), { index: false }));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
+app.get('/login', (req, res) => res.sendFile(path.join(__dirname, '../public/login.html')));
+app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, '../public/dashboard.html')));
 
 // Error handler
 app.use((err, _req, res, _next) => {

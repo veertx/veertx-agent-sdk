@@ -1,0 +1,37 @@
+{
+  "name": "veertx-agents",
+  "version": "1.0.0",
+  "description": "Non-custodial middleware API for AI agents on Solana. Send intent, get back a signable transaction.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/veertx/veertx-agent-sdk.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/veertx/veertx-agent-sdk/issues"
+  },
+  "homepage": "https://github.com/veertx/veertx-agent-sdk#readme",
+  "dependencies": {
+    "@solana/web3.js": "^1.98.4",
+    "argon2": "^0.44.0",
+    "better-sqlite3": "^12.8.0",
+    "dotenv": "^17.4.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.3.2",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
+    "uuid": "^13.0.0",
+    "zod": "^4.3.6"
+  }
+}

@@ -15,7 +15,6 @@ async function getQuote(inputMint, outputMint, amount, slippageBps) {
     outputMint,
     amount: String(amount),
     slippageBps: String(slippageBps),
-    platformFeeBps: '50',
   });
 
   const res = await fetch(`${JUPITER_API}/quote?${params}`, {
@@ -40,7 +39,6 @@ async function buildSwapTransaction(quoteResponse, userPublicKey) {
     body: JSON.stringify({
       quoteResponse,
       userPublicKey,
-      feeAccount: process.env.JUPITER_FEE_ACCOUNT,
     }),
   });
 

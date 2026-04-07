@@ -1,107 +1,131 @@
-# VeerTx Agent SDK
+# VeerTx Agent API
 
-Non-custodial middleware API for AI agents on Solana. Send intent, get back a signable transaction.
+The VeerTx Agent API is a non-custodial middleware layer designed specifically for AI agents trading on Solana.
 
-## What Is This?
+We abstract away the complexity of blockchain routing by preparing optimal transactions via the Jupiter Aggregator. **We never hold your funds or private keys.** You send us the swap parameters, we return a serialized Base64 transaction, and your agent signs and executes it locally.
 
-VeerTx Agent SDK is an API that lets AI agents execute Solana transactions without ever handling private keys. Your agent sends a swap request, VeerTx constructs the optimal transaction via Jupiter, and returns it as a base64-encoded string. Your agent signs it locally and submits it to the network.
+**Base URL:** `https://agents.veertx.com`
 
-**Non-custodial by design.** The server never sees, stores, or touches private keys. Ever.
+---
 
-## How It Works
+## Overview
 
+- **Non-Custodial:** Private keys never leave your agent's local environment.
+- **Optimal Routing:** Powered by Jupiter for the best prices and execution across all Solana DEXs.
+- **Simple Integration:** One API call returns a ready-to-sign transaction.
+- **Transparent Fees:** A standard 0.5% referral fee is applied to the swap via Jupiter's protocol. No hidden markups.
+
+---
+
+## Authentication
+
+All API requests require an active API key. Generate one instantly at the [VeerTx Developer Portal](https://agents.veertx.com).
+```http
+Authorization: Bearer vrtx_live_your_api_key_here
 ```
-Agent sends intent ──► VeerTx API constructs transaction ──► Returns base64 tx
-                                                                    │
-Agent signs locally ◄───────────────────────────────────────────────┘
-                │
-Agent submits to Solana ──► Transaction confirmed
+
+---
+
+## Endpoints
+
+### POST /v1/swap
+
+Constructs an unsigned transaction for your AI agent to sign.
+
+**Headers:**
+- `Content-Type: application/json`
+- `Authorization: Bearer vrtx_live_...`
+- `Idempotency-Key: <UUID>` (Required -- prevents duplicate execution on retries)
+
+**Request Payload:**
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| inputToken | string | Solana mint address of the token you are selling |
+| outputToken | string | Solana mint address of the token you are buying |
+| amount | string | Amount in lamports as a string |
+| agentPublicKey | string | Base58 public key of the wallet that will sign |
+| slippageBps | number | Slippage tolerance in basis points (e.g. 50 = 0.5%) |
+
+**Example Request:**
+```bash
+curl -X POST https://agents.veertx.com/v1/swap \
+  -H "Authorization: Bearer vrtx_live_..." \
+  -H "Idempotency-Key: 123e4567-e89b-12d3-a456-426614174000" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "inputToken": "So11111111111111111111111111111111111111112",
+    "outputToken": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    "amount": "100000000",
+    "agentPublicKey": "YourAgentWalletPublicKeyHere",
+    "slippageBps": 50
+  }'
 ```
 
-1. Your agent authenticates with an API key (`vrtx_live_...`)
-2. Sends a swap request (input token, output token, amount)
-3. VeerTx routes through Jupiter for best price
-4. Returns an unsigned transaction as base64
-5. Your agent signs with its own keypair and submits
+**Example Response:**
+```json
+{
+  "success": true,
+  "transaction": "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...",
+  "quote": {
+    "inputAmount": "100000000",
+    "outputAmount": "785204",
+    "fee": {
+      "amount": "3945",
+      "feeBps": 50
+    }
+  }
+}
+```
 
-## Quick Start
+---
 
-### TypeScript
-
+## Execution Guide (Node.js)
 ```typescript
-import { Keypair, Connection, VersionedTransaction } from "@solana/web3.js";
+import { Connection, Keypair, VersionedTransaction } from '@solana/web3.js';
+import bs58 from 'bs58';
 
-const API_KEY = "vrtx_live_your_api_key_here";
-const BASE_URL = "https://agents.veertx.com";
+const connection = new Connection('https://api.mainnet-beta.solana.com');
+const agentKeypair = Keypair.fromSecretKey(bs58.decode('YOUR_PRIVATE_KEY'));
 
-// 1. Request a swap transaction
-const response = await fetch(`${BASE_URL}/v1/swap`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${API_KEY}`,
-    "Idempotency-Key": crypto.randomUUID(),
-  },
-  body: JSON.stringify({
-    inputToken: "So11111111111111111111111111111111111111112",  // SOL
-    outputToken: "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm", // WIF
-    amount: 1_000_000_000, // 1 SOL in lamports
-    slippageBps: 50,
-    agentPublicKey: "YourWalletPublicKeyHere",
-  }),
-});
+async function executeSwap() {
+  const response = await fetch('https://agents.veertx.com/v1/swap', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer vrtx_live_...',
+      'Idempotency-Key': crypto.randomUUID()
+    },
+    body: JSON.stringify({
+      inputToken: 'So11111111111111111111111111111111111111112',
+      outputToken: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+      amount: '10000000',
+      agentPublicKey: agentKeypair.publicKey.toBase58(),
+      slippageBps: 50
+    })
+  });
 
-const { data } = await response.json();
+  const { transaction } = await response.json();
+  const txBuffer = Buffer.from(transaction, 'base64');
+  const tx = VersionedTransaction.deserialize(txBuffer);
 
-// 2. Sign the transaction locally
-const txBuffer = Buffer.from(data.transaction, "base64");
-const transaction = VersionedTransaction.deserialize(txBuffer);
-transaction.sign([yourKeypair]);
+  tx.sign([agentKeypair]);
 
-// 3. Submit to Solana
-const connection = new Connection("https://api.mainnet-beta.solana.com");
-const signature = await connection.sendTransaction(transaction);
-console.log(`Transaction confirmed: ${signature}`);
+  const signature = await connection.sendTransaction(tx, {
+    maxRetries: 3,
+    preflightCommitment: 'confirmed'
+  });
+
+  console.log(`Swap executed! Signature: ${signature}`);
+}
+
+executeSwap();
 ```
 
-## API Endpoints
+---
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/v1/swap` | Construct a swap transaction |
-| `GET` | `/v1/health` | Service health check |
+## Links
 
-## Revenue Model
-
-A 0.5% referral fee (50bps) is applied to all Jupiter swaps routed through VeerTx. This fee is embedded in the transaction at construction time and is non-overridable.
-
-## Project Structure
-
-```
-veertx-agents/
-├── server/          # Express API server
-│   ├── routes/      # API route handlers
-│   ├── middleware/   # Auth, rate limiting, validation
-│   ├── services/    # Jupiter, transaction construction
-│   └── db/          # Database access layer
-├── sdk/
-│   ├── typescript/  # @veertx/agent-sdk npm package
-│   └── python/      # veertx-agent PyPI package
-├── db/              # Database schema
-├── docs/            # Documentation
-└── examples/        # Example integrations
-```
-
-## Security
-
-- Non-custodial: private keys never touch the server
-- API keys hashed with HMAC-SHA256 with a secret pepper
-- Zod validation on every endpoint
-- Rate limiting per IP and per API key
-- All fees hardcoded server-side
-
-See [SECURITY.md](./SECURITY.md) for the full checklist.
-
-## License
-
-Proprietary. All rights reserved.
+- [Developer Portal](https://agents.veertx.com)
+- [Documentation](https://veertx.gitbook.io/veertx-docs)
+- [X](https://x.com/VeerTx) · [Discord](https://discord.gg/tNf5pDVVCe) · [Telegram](https://t.me/VeerTx)

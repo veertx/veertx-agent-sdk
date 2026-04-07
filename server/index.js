@@ -6,6 +6,7 @@ const pino = require('pino');
 const { globalLimiter } = require('./middleware/rateLimiter');
 const swapRouter = require('./routes/swap');
 const keysRouter = require('./routes/keys');
+const db = require('./db/database');
 
 const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
 
@@ -75,3 +76,10 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   logger.info(`VeerTx Agent API listening on port ${PORT}`);
 });
+
+// Hourly cleanup of expired sessions and magic tokens
+setInterval(() => {
+  const now = Math.floor(Date.now() / 1000);
+  db.prepare('DELETE FROM sessions WHERE expires_at < ?').run(now);
+  db.prepare('DELETE FROM magic_tokens WHERE expires_at < ?').run(now);
+}, 60 * 60 * 1000);

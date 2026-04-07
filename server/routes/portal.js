@@ -3,14 +3,23 @@ const crypto = require('crypto');
 const { Resend } = require('resend');
 const db = require('../db/database');
 const portalAuth = require('../middleware/portalAuth');
+const rateLimit = require('express-rate-limit');
 
 const router = Router();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many login attempts. Try again in 15 minutes.' } },
+});
+
 // POST /v1/portal/auth/login
-router.post('/auth/login', async (req, res, next) => {
+router.post('/auth/login', loginLimiter, async (req, res, next) => {
   try {
     const { email, turnstileToken } = req.body;
 
@@ -117,7 +126,7 @@ router.get('/auth/verify', async (req, res, next) => {
     res.cookie('vrtx_session', rawSession, {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: sevenDays * 1000,
     });
 
@@ -184,6 +193,50 @@ router.delete('/keys/:id', portalAuth, (req, res) => {
   }
 
   return res.json({ success: true, data: { message: 'API key revoked' } });
+});
+
+// POST /v1/portal/auth/logout
+router.post('/auth/logout', (req, res) => {
+  const raw = req.cookies?.vrtx_session;
+
+  if (raw) {
+    const sessionHash = crypto.createHash('sha256').update(raw).digest('hex');
+    db.prepare('DELETE FROM sessions WHERE session_hash = ?').run(sessionHash);
+  }
+
+  res.clearCookie('vrtx_session', {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+  });
+
+  return res.json({ success: true, message: 'Logged out' });
+});
+
+// GET /v1/portal/stats
+router.get('/stats', portalAuth, (req, res) => {
+  const rows = db.prepare(`
+    SELECT strftime('%Y-%m-%d', t.created_at) AS date, COUNT(*) AS count
+    FROM transactions t
+    JOIN api_keys ak ON ak.id = t.api_key_id
+    WHERE ak.developer_id = ?
+      AND t.created_at >= datetime('now', '-7 days')
+    GROUP BY date
+    ORDER BY date
+  `).all(req.developerId);
+
+  const counts = Object.fromEntries(rows.map(r => [r.date, r.count]));
+  const stats = [];
+  const now = new Date();
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setUTCDate(d.getUTCDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    stats.push({ date: key, count: counts[key] || 0 });
+  }
+
+  return res.json({ success: true, data: { timezone: 'UTC', stats } });
 });
 
 module.exports = router;

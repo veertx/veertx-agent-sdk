@@ -167,6 +167,9 @@
         document.body.style.display = '';
         renderKeys(data.data.keys);
         loadStats();
+        fetch('/v1/portal/me', { credentials: 'same-origin' })
+          .then(r => r.json())
+          .then(d => { document.getElementById('devEmail').textContent = d.data.email; });
       } catch {
         window.location.href = '/login';
       }

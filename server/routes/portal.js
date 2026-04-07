@@ -145,6 +145,15 @@ router.get('/keys', portalAuth, (req, res) => {
   return res.json({ success: true, data: { keys } });
 });
 
+// GET /v1/portal/me
+router.get('/me', portalAuth, (req, res) => {
+  const dev = db
+    .prepare('SELECT email FROM developers WHERE id = ?')
+    .get(req.developerId);
+
+  return res.json({ success: true, data: { email: dev.email } });
+});
+
 // POST /v1/portal/keys
 router.post('/keys', portalAuth, (req, res, next) => {
   try {

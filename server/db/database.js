@@ -22,4 +22,10 @@ try {
   // Column already exists
 }
 
+try {
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_transactions_idempotency ON transactions(idempotency_key) WHERE idempotency_key IS NOT NULL');
+} catch (_) {
+  // Index already exists
+}
+
 module.exports = db;

@@ -25,6 +25,9 @@ app.use(express.json());
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
+const helmet = require('helmet');
+app.use(helmet());
+
 // Log all requests
 app.use((req, res, next) => {
   const start = Date.now();

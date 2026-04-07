@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     amount TEXT NOT NULL,
     jupiter_tx_hash TEXT,
     fee_bps INTEGER NOT NULL DEFAULT 50,
+    idempotency_key TEXT UNIQUE,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (api_key_id) REFERENCES api_keys(id)
 );

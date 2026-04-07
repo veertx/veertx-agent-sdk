@@ -26,9 +26,20 @@ const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
 const helmet = require('helmet');
-// app.use(helmet({
-//   contentSecurityPolicy: false,
-// }));
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://challenges.cloudflare.com"],
+      frameSrc: ["'self'", "https://challenges.cloudflare.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+      connectSrc: ["'self'", "https://challenges.cloudflare.com"],
+      upgradeInsecureRequests: [],
+      objectSrc: ["'none'"],
+    },
+  }
+}));
 
 // Log all requests
 app.use((req, res, next) => {

@@ -25,11 +25,12 @@
     .hero-label { display: inline-block; color: #00ff88; font-size: 12px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 24px; }
     .hero h1 { font-size: 56px; font-weight: 700; letter-spacing: -1.5px; line-height: 1.1; max-width: 720px; margin: 0 auto 24px; }
     .hero .sub { color: #666666; font-size: 18px; line-height: 1.6; max-width: 560px; margin: 0 auto 48px; font-weight: 400; word-wrap: break-word; overflow-wrap: break-word; padding: 0 16px; }
-    .hero-buttons { display: flex; gap: 0; justify-content: center; margin-bottom: 32px; }
-    .btn-primary { background: #00ff88; color: #000000; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 4px 0 0 4px; border: 1px solid transparent; font-family: inherit; cursor: pointer; transition: opacity 0.15s; min-width: 160px; }
+    .button-group { display: inline-flex; align-items: stretch; margin-bottom: 32px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 24px; font-family: inherit; font-size: 14px; font-weight: 600; box-sizing: border-box; cursor: pointer; margin: 0; text-decoration: none; }
+    .btn-primary { background-color: #00ff88; color: #000; border: 1px solid #00ff88; border-radius: 4px 0 0 4px; transition: opacity 0.15s; }
     .btn-primary:hover { opacity: 0.85; }
-    .btn-outline { background: transparent; color: #ffffff; font-size: 14px; font-weight: 500; padding: 12px 28px; border-radius: 0 4px 4px 0; border: 1px solid #333333; border-left: none; font-family: inherit; cursor: pointer; transition: border-color 0.15s, color 0.15s; min-width: 160px; }
-    .btn-outline:hover { border-color: #666666; }
+    .btn-secondary { background-color: transparent; color: #fff; border: 1px solid #333; border-left: none; border-radius: 0 4px 4px 0; transition: border-color 0.15s; }
+    .btn-secondary:hover { border-color: #666; }
     .hero .proof { color: #444444; font-size: 13px; font-weight: 400; }
 
     /* Features */
@@ -67,7 +68,7 @@
       .code-section { padding: 0 20px 80px; overflow: hidden; }
       pre, code { white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; }
       footer { flex-direction: column; gap: 16px; text-align: center; padding: 24px 20px; }
-      .hero-buttons { flex-direction: column; align-items: center; }
+      .button-group { flex-direction: column; align-items: center; }
     }
   </style>
 </head>
@@ -83,9 +84,9 @@
     <div class="hero-label">Built for AI Agents</div>
     <h1>The Swap API for AI Agents on Solana</h1>
     <p class="sub">The easiest way for AI agents to trade on Solana. We build the optimal route via Jupiter, so your script just has to sign and execute it locally.</p>
-    <div class="hero-buttons">
-      <a href="/login"><button class="btn-primary">Get API Key</button></a>
-      <a href="https://github.com/veertx/veertx-agent-sdk" target="_blank"><button class="btn-outline">View on GitHub</button></a>
+    <div class="button-group">
+      <a href="/login" class="btn btn-primary">Get API Key</a>
+      <a href="https://github.com/veertx/veertx-agent-sdk" target="_blank" class="btn btn-secondary">View on GitHub</a>
     </div>
     <div class="proof">Powered by Jupiter Aggregator</div>
   </section>

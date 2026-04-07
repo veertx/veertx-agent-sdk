@@ -43,11 +43,11 @@ const response = await fetch(`${BASE_URL}/v1/swap`, {
     "Idempotency-Key": crypto.randomUUID(),
   },
   body: JSON.stringify({
-    inputMint: "So11111111111111111111111111111111111111112",  // SOL
-    outputMint: "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm", // WIF
+    inputToken: "So11111111111111111111111111111111111111112",  // SOL
+    outputToken: "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm", // WIF
     amount: 1_000_000_000, // 1 SOL in lamports
     slippageBps: 50,
-    userPublicKey: "YourWalletPublicKeyHere",
+    agentPublicKey: "YourWalletPublicKeyHere",
   }),
 });
 
@@ -95,7 +95,7 @@ veertx-agents/
 ## Security
 
 - Non-custodial: private keys never touch the server
-- API keys hashed with argon2
+- API keys hashed with HMAC-SHA256 with a secret pepper
 - Zod validation on every endpoint
 - Rate limiting per IP and per API key
 - All fees hardcoded server-side

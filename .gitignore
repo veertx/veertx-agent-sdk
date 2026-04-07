@@ -1,5 +1,7 @@
 .env
 agents.sqlite
+*.sqlite-wal
+*.sqlite-shm
 node_modules
 dist
 *.log

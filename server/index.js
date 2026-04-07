@@ -26,7 +26,9 @@ const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
 const helmet = require('helmet');
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false,
+}));
 
 // Log all requests
 app.use((req, res, next) => {

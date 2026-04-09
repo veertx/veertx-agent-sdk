@@ -65,6 +65,8 @@ app.get('/health', (_req, res) => {
 
 // Routes
 app.use('/v1/swap', swapRouter);
+const paymentsRouter = require('./routes/payments');
+app.use('/v1/payments', paymentsRouter);
 app.use('/v1/keys', keysRouter);
 const portalRouter = require('./routes/portal');
 app.use('/v1/portal', portalRouter);

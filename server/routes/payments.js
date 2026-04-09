@@ -46,7 +46,7 @@ router.post('/create', auth, async (req, res, next) => {
     const response = await fetch('http://127.0.0.1:3000/internal/payments/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount, currency, target_username, memo, webhook_url, idempotency_key: idempotencyKey })
+      body: JSON.stringify({ amount, currency, target_username, memo, webhook_url, idempotency_key: idempotencyKey, developer_id: req.developer.id })
     });
 
     const data = await response.json();

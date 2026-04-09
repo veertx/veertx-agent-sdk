@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS developers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT NOT NULL UNIQUE,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    webhook_secret TEXT
 );
 
 CREATE TABLE IF NOT EXISTS api_keys (

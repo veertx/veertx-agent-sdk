@@ -86,10 +86,25 @@
       .keys-table { overflow-x: auto; -webkit-overflow-scrolling: touch; }
       table { min-width: 480px; }
       .page-header { padding-bottom: 16px; margin-bottom: 20px; }
+      .mobile-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #1a1a1a; margin-bottom: 16px; }
+      .mobile-header .mobile-logo { color: #00ff88; font-size: 14px; font-weight: 600; }
+      .mobile-nav { display: flex; gap: 16px; align-items: center; }
+      .mobile-nav a { color: #666666; font-size: 13px; text-decoration: none; }
+      .mobile-nav .mobile-signout { background: none; border: none; color: #666666; font-size: 13px; font-family: inherit; cursor: pointer; padding: 0; }
+      .mobile-footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid #1a1a1a; font-size: 12px; color: #444444; }
     }
   </style>
 </head>
 <body style="display:none">
+  <div class="mobile-header" style="display:none">
+      <div class="mobile-logo">VeerTx Agents</div>
+      <nav class="mobile-nav">
+        <a href="https://github.com/veertx/veertx-agent-sdk" target="_blank">Docs</a>
+        <span id="mobileEmail" style="color:#444;font-size:12px"></span>
+        <button class="mobile-signout" id="mobileLogout">Sign out</button>
+      </nav>
+    </div>
+
   <aside class="sidebar">
     <div class="sidebar-logo">VeerTx Agents</div>
     <nav class="sidebar-nav">
@@ -173,11 +188,13 @@
         if (res.status === 401) { window.location.href = '/login'; return; }
         const data = await res.json();
         document.body.style.display = '';
+        if (window.innerWidth <= 768) document.querySelector('.mobile-header').style.display = 'flex';
         renderKeys(data.data.keys);
         loadStats();
         fetch('/v1/portal/me', { credentials: 'same-origin' })
           .then(r => r.json())
-          .then(d => { document.getElementById('devEmail').textContent = d.data.email; });
+          .then(d => { document.getElementById('devEmail').textContent = d.data.email;
+document.getElementById('mobileEmail').textContent = d.data.email; });
       } catch {
         window.location.href = '/login';
       }
@@ -270,6 +287,11 @@
       document.getElementById('keyDisplay').innerText = '';
       document.getElementById('modal').classList.remove('active');
     });
+
+    document.getElementById('mobileLogout').addEventListener('click', async () => {
+        await fetch('/v1/portal/auth/logout', { method: 'POST', credentials: 'same-origin' });
+        window.location.href = '/login';
+      });
 
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       await fetch('/v1/portal/auth/logout', { method: 'POST', credentials: 'same-origin' });

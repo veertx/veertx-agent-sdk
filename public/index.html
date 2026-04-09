@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VeerTx Agents – The Swap API for AI Agents on Solana</title>
+  <title>VeerTx Agents – Private Payment API for AI Agents on Solana</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -83,13 +83,13 @@
 
   <section class="hero">
     <div class="hero-label">Built for AI Agents</div>
-    <h1>The Swap API for AI Agents on Solana</h1>
-    <p class="sub">The easiest way for AI agents to trade on Solana. We build the optimal route via Jupiter, so your script just has to sign and execute it locally.</p>
+    <h1>Private Payments API for AI Agents on Solana</h1>
+    <p class="sub">Let your AI agent send private SOL and USDC payments through a ZK pool. Generate a payment link, fund it, and the receiver claims privately. No KYC, no custodian.</p>
     <div class="button-group">
       <a href="/login" class="btn btn-primary">Get API Key</a>
       <a href="https://github.com/veertx/veertx-agent-sdk" target="_blank" class="btn btn-secondary">View on GitHub</a>
     </div>
-    <div class="proof">Powered by Jupiter Aggregator</div>
+    <div class="proof">Powered by Privacy Cash ZK Pool</div>
   </section>
 
   <section class="features">
@@ -104,8 +104,8 @@
       <div class="feature-icon">
         <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
       </div>
-      <h3>Jupiter Routing</h3>
-      <p>Best swap rates across all Solana DEXs via Jupiter aggregator. Any token pair, optimal execution.</p>
+      <h3>ZK Privacy Pool</h3>
+      <p>Payments route through Privacy Cash ZK pool with 10-45 min delay. Sender and receiver are never linked on-chain.</p>
     </div>
     <div class="feature-card">
       <div class="feature-icon">
@@ -123,15 +123,16 @@
         <div class="code-tab">cURL</div>
       </div>
       <div class="code-body">
-<pre><span class="cm">curl</span> -X POST https://agents.veertx.com/v1/swap \
+<pre><span class="cm">curl</span> -X POST https://agents.veertx.com/v1/payments/create \
   -H <span class="st">"Authorization: Bearer vrtx_live_..."</span> \
   -H <span class="st">"Content-Type: application/json"</span> \
+  -H <span class="st">"Idempotency-Key: req_abc123"</span> \
   -d '{
-    <span class="ky">"inputToken"</span>: <span class="st">"SOL"</span>,
-    <span class="ky">"outputToken"</span>: <span class="st">"USDC"</span>,
-    <span class="ky">"amount"</span>: <span class="st">"100000000"</span>,
-    <span class="ky">"agentPublicKey"</span>: <span class="st">"YourSolanaPublicKey..."</span>,
-    <span class="ky">"slippageBps"</span>: 50
+    <span class="ky">"amount"</span>: <span class="st">1.5</span>,
+    <span class="ky">"currency"</span>: <span class="st">"SOL"</span>,
+    <span class="ky">"target_username"</span>: <span class="st">"receiver"</span>,
+    <span class="ky">"memo"</span>: <span class="st">"Payment for work"</span>,
+    <span class="ky">"webhook_url"</span>: <span class="st">"https://yourapp.com/webhook"</span>
   }'</pre>
       </div>
     </div>

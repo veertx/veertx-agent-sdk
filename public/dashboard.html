@@ -189,7 +189,7 @@
           <td>${esc(k.prefix)}</td>
           <td><span class="status-badge ${k.status}"><span class="dot ${k.status}"></span>${k.status}</span></td>
           <td>${k.created_at}</td>
-          <td>${k.status === 'active' ? `<button class="revoke-btn" onclick="revokeKey(${k.id})">Revoke</button>` : '\u2014'}</td>
+          <td>${k.status === 'active' ? `<button class="revoke-btn" data-revoke-id="${k.id}">Revoke</button>` : '\u2014'}</td>
         </tr>
       `).join('');
     }
@@ -267,6 +267,11 @@
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       await fetch('/v1/portal/auth/logout', { method: 'POST', credentials: 'same-origin' });
       window.location.href = '/login';
+    });
+
+    document.getElementById('keysBody').addEventListener('click', function(e) {
+      const btn = e.target.closest('[data-revoke-id]');
+      if (btn) revokeKey(parseInt(btn.dataset.revokeId));
     });
 
     init();

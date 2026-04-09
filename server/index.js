@@ -67,6 +67,8 @@ app.get('/health', (_req, res) => {
 app.use('/v1/swap', swapRouter);
 const paymentsRouter = require('./routes/payments');
 app.use('/v1/payments', paymentsRouter);
+const webhooksRouter = require('./routes/webhooks');
+app.use('/internal/webhooks', webhooksRouter);
 app.use('/v1/keys', keysRouter);
 const portalRouter = require('./routes/portal');
 app.use('/v1/portal', portalRouter);
@@ -95,6 +97,7 @@ app.listen(PORT, () => {
   logger.info(`VeerTx Agent API listening on port ${PORT}`);
 });
 
+require('./workers/webhookWorker');
 // Hourly cleanup of expired sessions and magic tokens
 setInterval(() => {
   const now = Math.floor(Date.now() / 1000);

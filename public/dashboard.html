@@ -166,6 +166,21 @@
         </table>
       </div>
     </div>
+
+      <div class="webhook-section" style="margin-top:32px;">
+        <div class="keys-header">
+          <div class="section-title" style="margin-bottom:0">Webhook Secret</div>
+          <button class="generate-btn" id="regenSecretBtn">Regenerate</button>
+        </div>
+        <div class="keys-table" style="padding:20px 24px;">
+          <div style="font-size:12px;color:#666;margin-bottom:12px;">Use this secret to verify incoming webhook signatures from VeerTx.</div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <code id="webhookSecretDisplay" style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#00ff88;flex:1;word-break:break-all;">whsec_••••••••••••••••••••••••••••••••••••••••••••</code>
+            <button class="revoke-btn" id="revealSecretBtn" style="border-color:#00ff88;color:#00ff88;white-space:nowrap;">Reveal</button>
+            <button class="revoke-btn" id="copySecretBtn" style="border-color:#666;color:#666;white-space:nowrap;">Copy</button>
+          </div>
+        </div>
+      </div>
   </div>
 
   <div class="modal-overlay" id="modal">
@@ -302,6 +317,53 @@ document.getElementById('mobileEmail').textContent = d.data.email; });
       const btn = e.target.closest('[data-revoke-id]');
       if (btn) revokeKey(parseInt(btn.dataset.revokeId));
     });
+
+      // Webhook secret
+      let webhookSecretRevealed = false;
+      let webhookSecretValue = '';
+
+      async function loadWebhookSecret() {
+        try {
+          const res = await fetch('/v1/portal/webhook-secret', { credentials: 'same-origin' });
+          if (!res.ok) return;
+          const data = await res.json();
+          webhookSecretValue = data.data.secret;
+        } catch {}
+      }
+
+      document.getElementById('revealSecretBtn').addEventListener('click', async () => {
+        if (!webhookSecretValue) await loadWebhookSecret();
+        if (!webhookSecretRevealed) {
+          document.getElementById('webhookSecretDisplay').textContent = webhookSecretValue;
+          document.getElementById('revealSecretBtn').textContent = 'Hide';
+          webhookSecretRevealed = true;
+        } else {
+          document.getElementById('webhookSecretDisplay').textContent = 'whsec_••••••••••••••••••••••••••••••••••••••••••••';
+          document.getElementById('revealSecretBtn').textContent = 'Reveal';
+          webhookSecretRevealed = false;
+        }
+      });
+
+      document.getElementById('copySecretBtn').addEventListener('click', async () => {
+        if (!webhookSecretValue) await loadWebhookSecret();
+        navigator.clipboard.writeText(webhookSecretValue);
+        document.getElementById('copySecretBtn').textContent = 'Copied!';
+        setTimeout(() => { document.getElementById('copySecretBtn').textContent = 'Copy'; }, 2000);
+      });
+
+      document.getElementById('regenSecretBtn').addEventListener('click', async () => {
+        if (!confirm('Regenerate webhook secret? Your existing integrations will stop working until updated.')) return;
+        try {
+          const res = await fetch('/v1/portal/webhook-secret/regenerate', { method: 'POST', credentials: 'same-origin' });
+          const data = await res.json();
+          if (res.ok) {
+            webhookSecretValue = data.data.secret;
+            webhookSecretRevealed = true;
+            document.getElementById('webhookSecretDisplay').textContent = webhookSecretValue;
+            document.getElementById('revealSecretBtn').textContent = 'Hide';
+          }
+        } catch {}
+      });
 
     init();
   </script>

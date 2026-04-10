@@ -2,6 +2,7 @@ const { Router } = require('express');
 const { Queue } = require('bullmq');
 const IORedis = require('ioredis');
 const db = require('../db/database');
+const { decrypt } = require('../utils/crypto');
 
 const router = Router();
 
@@ -46,6 +47,12 @@ router.post('/trigger', (req, res) => {
   if (!developer || !developer.webhook_secret) {
     return res.status(404).json({ success: false, error: 'Developer or webhook secret not found' });
   }
+  let webhookSecret;
+  try {
+    webhookSecret = decrypt(developer.webhook_secret);
+  } catch {
+    return res.status(500).json({ success: false, error: 'Failed to decrypt webhook secret' });
+  }
 
   const payload = {
     event: 'payment.claimed',
@@ -58,7 +65,7 @@ router.post('/trigger', (req, res) => {
 
   webhookQueue.add('dispatch', {
     webhook_url,
-    webhook_secret: developer.webhook_secret,
+    webhook_secret: webhookSecret,
     payload,
   });
 

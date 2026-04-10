@@ -54,9 +54,12 @@ router.post('/auth/login', loginLimiter, async (req, res, next) => {
       .get(email);
 
     if (!developer) {
+      const { encrypt } = require('../utils/crypto');
+      const rawSecret = 'whsec_live_' + crypto.randomBytes(24).toString('hex');
+      const encryptedSecret = encrypt(rawSecret);
       const result = db
-        .prepare('INSERT INTO developers (email) VALUES (?)')
-        .run(email);
+        .prepare('INSERT INTO developers (email, webhook_secret) VALUES (?, ?)')
+        .run(email, encryptedSecret);
       developer = { id: result.lastInsertRowid };
     }
 
